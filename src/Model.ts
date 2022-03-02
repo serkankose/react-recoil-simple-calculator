@@ -3,7 +3,7 @@ import _ from 'lodash'
 import {evaluate} from "./Model.Expr";
 
 
-export type Digit = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+export type Digit = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 export type Operator = '+' | '-' | '*' | '/' | '^';
 
 
@@ -70,6 +70,14 @@ export const calcInput_state = atom(
     {
         key: 'calcInput',
         default: ''
+    }
+)
+
+
+export const resultValue_state = atom(
+    {
+        key: 'resultValue',
+        default: 0
     }
 )
 

@@ -23,8 +23,21 @@ describe("operations on calculator", () => {
         clickButton(getByText, "1");
         clickButton(getByText, "2");
 
-        const inputLabel = screen.getByTestId("user_input") as HTMLInputElement;
+        const inputLabel = screen.getByTestId("user_input") as HTMLParagraphElement;
         expect(inputLabel).toHaveTextContent("12");
+
+
+        clickButton(getByText, "*");
+        clickButton(getByText, "1");
+        clickButton(getByText, "2");
+        clickButton(getByText, "-");
+        clickButton(getByText, "4");
+        clickButton(getByText, "4");
+
+        clickButton(getByText, "=")
+
+        const result = screen.getByTestId("result") as HTMLParagraphElement;
+        expect(result).toHaveTextContent("100");
 
     });
 });

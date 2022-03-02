@@ -11,6 +11,6 @@ export function OperatorButton(props: { op: Operator, disabled: boolean, onClick
 }
 
 export function EqualsButton(props: { op: Equals, disabled: boolean, onClick: ({currentTarget: {value}}: React.MouseEvent<HTMLButtonElement>) => void }) {
-    return <Button disabled={props.disabled} variant="contained" color="primary" onClick={props.onClick}
+    return <Button disabled={props.disabled} variant="contained" color="secondary" onClick={props.onClick}
                    value={props.op}>{props.op}</Button>;
 }

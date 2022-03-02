@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import {Button, Typography} from "@mui/material";
+import {Typography} from "@mui/material";
 import {Backspace} from "@mui/icons-material";
 import {RecoilRoot, selector, useRecoilState, useRecoilValue,} from 'recoil';
 import _ from 'lodash';
@@ -9,13 +9,14 @@ import {EqualsButton, OperatorButton} from "./OperatorButton";
 import {
     calcInput_state,
     elements_state, Digit,
-    Operator, elementsToString,
+    Operator, elementsToString, calculate, resultValue_state,
 } from './Model'
 
 function Calculator() {
 
     const [elements, setElements] = useRecoilState(elements_state);
     const [calcInput, setCalcInput] = useRecoilState(calcInput_state);
+    const [resultValue, setResultValue] = useRecoilState(resultValue_state);
 
     const inputAsText = selector({
         key: 'inputAsText',
@@ -26,10 +27,22 @@ function Calculator() {
         }
     })
 
-
     const inputAsTextValue = useRecoilValue(inputAsText);
 
-    const onClick = ({currentTarget: {value}}: React.MouseEvent<HTMLButtonElement>) => {
+    const resultValueSelector = selector({
+        key: 'resultValueText',
+        get: ({get}) => {
+            try {
+                return resultValue;
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    })
+
+    const resultValueText = useRecoilValue(resultValueSelector);
+
+    const onDigit = ({currentTarget: {value}}: React.MouseEvent<HTMLButtonElement>) => {
 
         const empty = calcInput.length == 0;
 
@@ -52,7 +65,11 @@ function Calculator() {
     };
 
     const onEquals = (event: any) => {
-        throw new Error("not implemented");
+        const result = calculate(elementsToString(elements));
+        setElements([]);
+        setCalcInput('');
+        setResultValue(result);
+        console.log("result", result);
     };
 
     const onBackSpace = ({currentTarget: {value}}: React.MouseEvent<any>) => {
@@ -87,37 +104,38 @@ function Calculator() {
     return <div>
         <div className="calculator">
             <div>
-                <NumberButton onClick={onClick} value={1}/>
-                <NumberButton onClick={onClick} value={2}/>
-                <NumberButton onClick={onClick} value={3}/>
+                <NumberButton onClick={onDigit} value={1}/>
+                <NumberButton onClick={onDigit} value={2}/>
+                <NumberButton onClick={onDigit} value={3}/>
                 <OperatorButton op="+" disabled={getDisabled()} onClick={onOperator}/>
                 <OperatorButton op="*" disabled={getDisabled()} onClick={onOperator}/>
             </div>
             <div>
-                <NumberButton onClick={onClick} value={4}/>
-                <NumberButton onClick={onClick} value={5}/>
-                <NumberButton onClick={onClick} value={6}/>
+                <NumberButton onClick={onDigit} value={4}/>
+                <NumberButton onClick={onDigit} value={5}/>
+                <NumberButton onClick={onDigit} value={6}/>
                 <OperatorButton op="-" disabled={getDisabled()} onClick={onOperator}/>
                 <OperatorButton op="/" disabled={getDisabled()} onClick={onOperator}/>
             </div>
             <div>
-                <NumberButton onClick={onClick} value={7}/>
-                <NumberButton onClick={onClick} value={8}/>
-                <NumberButton onClick={onClick} value={9}/>
-                <OperatorButton op="^" disabled={getDisabled()} onClick={onOperator}/>
+                <NumberButton onClick={onDigit} value={7}/>
+                <NumberButton onClick={onDigit} value={8}/>
+                <NumberButton onClick={onDigit} value={9}/>
+                <NumberButton onClick={onDigit} value={0}/>
                 <EqualsButton op="=" disabled={getDisabled()} onClick={onEquals}/>
 
             </div>
             <div>
-                <Backspace color="primary" fontSize="large" onClick={onBackSpace}></Backspace>
                 <Typography data-testid="user_input">{inputAsTextValue}</Typography>
+                <Backspace color="primary" fontSize="large" onClick={onBackSpace}></Backspace>
+                <Typography data-testid="result">{resultValueText}</Typography>
             </div>
         </div>
-        <div className="history">
-            <ul>
-                <li>1 + 2</li>
-            </ul>
-        </div>
+        {/*<div className="history">*/}
+        {/*    <ul>*/}
+        {/*        <li>1 + 2</li>*/}
+        {/*    </ul>*/}
+        {/*</div>*/}
 
     </div>;
 }
