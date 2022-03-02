@@ -1,34 +1,18 @@
 import React from 'react';
 import './App.css';
-import {Button, TextField} from "@mui/material";
+import {Button, Typography} from "@mui/material";
 import {Backspace} from "@mui/icons-material";
-import {
-    RecoilRoot,
-    atom,
-    selector,
-    useRecoilState,
-    useRecoilValue,
-} from 'recoil';
+import {RecoilRoot, selector, useRecoilState, useRecoilValue,} from 'recoil';
 import _ from 'lodash';
+import {NumberButton} from "./NumberButton";
+import {EqualsButton, OperatorButton} from "./OperatorButton";
+import {
+    calcInput_state,
+    elements_state, Digit,
+    Operator, elementsToString,
+} from './Model'
 
 function Calculator() {
-
-    type Operator = '+' |  '-' |  '*' |  '/' |  '^';
-    type Equals = '=';
-
-    const elements_state = atom(
-        {
-            key: 'elements',
-            default: [] as Array<string>
-        }
-    )
-
-    const calcInput_state = atom(
-        {
-            key: 'calcInput',
-            default: ''
-        }
-    )
 
     const [elements, setElements] = useRecoilState(elements_state);
     const [calcInput, setCalcInput] = useRecoilState(calcInput_state);
@@ -36,57 +20,60 @@ function Calculator() {
     const inputAsText = selector({
         key: 'inputAsText',
         get: ({get}) => {
-            return elements.length > 0 ?
-                elements.reduce((previousValue, currentValue) => {
-                    return previousValue + currentValue;
-                }) : '';
+            return elements.length > 0
+                ? elementsToString(elements)
+                : '';
         }
     })
 
+
     const inputAsTextValue = useRecoilValue(inputAsText);
 
-    const onClick = ({currentTarget: {value}} : React.MouseEvent<HTMLButtonElement>) => {
+    const onClick = ({currentTarget: {value}}: React.MouseEvent<HTMLButtonElement>) => {
 
         const empty = calcInput.length == 0;
 
         console.log("onClick", value)
-        const input = calcInput + value;
+        const input = calcInput +  parseInt(value).toString();
         setCalcInput(input);
         setElements([...(empty ? elements : _.dropRight(elements, 1)), input])
         console.table({elements: inputAsTextValue, calcInput: input});
     };
 
-    const onOperator = ({currentTarget: {value}} : React.MouseEvent<HTMLButtonElement>) => {
-        if(!(value as Operator)){
+    const onOperator = ({currentTarget: {value}}: React.MouseEvent<HTMLButtonElement>) => {
+        if (!(value as Operator)) {
             throw new Error(`wrong type {value}`)
         }
 
         console.log("onOperator", value)
-        setElements([...elements, value])
+        setElements([...elements, value as Operator])
         setCalcInput('');
         console.table({elements: inputAsTextValue, calcInput: calcInput});
     };
-    const onEqual = (event: any) => {
+
+    const onEquals = (event: any) => {
         throw new Error("not implemented");
     };
 
-    const onBackSpace = ({currentTarget: {value}} : React.MouseEvent<any>) => {
+    const onBackSpace = ({currentTarget: {value}}: React.MouseEvent<any>) => {
         console.log("elements", elements);
         if (elements.length > 0) {
-            if ((_.last(elements) as string).length == 0) {
+            const last1 = _.last(elements) as string;
+            if (last1.length == 0) {
                 setElements(_.dropRight(elements, 1))
             }
-            const last = _.last(elements) as string;
+            const last = (_.last(elements) as string);
+
             console.log("last", last);
             const left = _.dropRight(elements, 1);
-            const backspaced = last.substring(0, last.length - 1) as string;
-            if(backspaced.length == 0){
+            const backspaced = last.substring(0, last.length - 1);
+            if (backspaced.length == 0) {
                 setElements(left);
-                setCalcInput((left.length>0?_.last(left):'') as string);
-            }
-            else{
-                setElements([...left, backspaced])
-                setCalcInput(backspaced);
+                setCalcInput((left.length > 0 ? (_.last(left) as string) : ''));
+            } else {
+                const digits = backspaced;
+                setElements([...left, digits])
+                setCalcInput(digits);
             }
 
         }
@@ -100,40 +87,30 @@ function Calculator() {
     return <div>
         <div className="calculator">
             <div>
-                <Button variant="contained" color="primary" onClick={onClick} value="1">1</Button>
-                <Button variant="contained" color="primary" onClick={onClick} value="2">2</Button>
-                <Button variant="contained" color="primary" onClick={onClick} value="3">3</Button>
-                <Button disabled={getDisabled()} variant="contained" color="primary"
-                        onClick={onOperator} value="+">+</Button>
-                <Button disabled={getDisabled()} variant="contained" color="primary"
-                        onClick={onOperator} value="*">*</Button>
+                <NumberButton onClick={onClick} value={1}/>
+                <NumberButton onClick={onClick} value={2}/>
+                <NumberButton onClick={onClick} value={3}/>
+                <OperatorButton op="+" disabled={getDisabled()} onClick={onOperator}/>
+                <OperatorButton op="*" disabled={getDisabled()} onClick={onOperator}/>
             </div>
             <div>
-                <Button variant="contained" color="primary" onClick={onClick} value="4">4</Button>
-                <Button variant="contained" color="primary" onClick={onClick} value="5">5</Button>
-                <Button variant="contained" color="primary" onClick={onClick} value="6">6</Button>
-                <Button disabled={getDisabled()} variant="contained" color="primary"
-                        onClick={onOperator}
-                        value="-">-</Button>
-                <Button disabled={getDisabled()} variant="contained" color="primary"
-                        onClick={onOperator}
-                        value="/">/</Button>
+                <NumberButton onClick={onClick} value={4}/>
+                <NumberButton onClick={onClick} value={5}/>
+                <NumberButton onClick={onClick} value={6}/>
+                <OperatorButton op="-" disabled={getDisabled()} onClick={onOperator}/>
+                <OperatorButton op="/" disabled={getDisabled()} onClick={onOperator}/>
             </div>
             <div>
-                <Button variant="contained" color="primary" onClick={onClick} value="7">7</Button>
-                <Button variant="contained" color="primary" onClick={onClick} value="8">8</Button>
-                <Button variant="contained" color="primary" onClick={onClick} value="9">9</Button>
-                <Button disabled={getDisabled()} variant="contained" color="primary"
-                        onClick={onOperator}
-                        value="^">^</Button>
-                <Button disabled={getDisabled()} variant="contained" color="primary"
-                        onClick={onEqual}
-                        value="=">=</Button>
+                <NumberButton onClick={onClick} value={7}/>
+                <NumberButton onClick={onClick} value={8}/>
+                <NumberButton onClick={onClick} value={9}/>
+                <OperatorButton op="^" disabled={getDisabled()} onClick={onOperator}/>
+                <EqualsButton op="=" disabled={getDisabled()} onClick={onEquals}/>
+
             </div>
             <div>
-                <TextField disabled data-testid="user_input" label="input" variant="standard"
-                           value={inputAsTextValue}></TextField>
                 <Backspace color="primary" fontSize="large" onClick={onBackSpace}></Backspace>
+                <Typography data-testid="user_input">{inputAsTextValue}</Typography>
             </div>
         </div>
         <div className="history">
